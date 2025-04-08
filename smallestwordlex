@@ -1,0 +1,25 @@
+%{
+#include <stdio.h>
+#include <string.h>
+
+char smallestWord[100]; // To store the smallest word
+int minLength = 100;    // Initialize with a large value
+%}
+
+%%
+[^\s\n]+   { 
+                int len = strlen(yytext); 
+                if (len < minLength) {
+                    minLength = len;
+                    strcpy(smallestWord, yytext);
+                }
+            }
+\n          { /* Do nothing for newlines */ }
+%%
+
+int main() {
+    printf("Enter a string: ");
+    yylex();
+    printf("Smallest word: %s\n", smallestWord);
+    return 0;
+}
