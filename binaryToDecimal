@@ -1,0 +1,42 @@
+%{
+#include <stdio.h>
+#include <math.h>
+
+int convert_binary(int binary);
+%}
+
+%token BINARY
+
+%%
+input:
+    input line
+  | /* empty */
+  ;
+
+line:
+    BINARY '\n'   { 
+        printf("Decimal: %d\n", convert_binary($1)); 
+    }
+  ;
+%%
+
+int convert_binary(int binary) {
+    int decimal = 0, base = 1, rem;
+    while (binary > 0) {
+        rem = binary % 10;
+        decimal = decimal + rem * base;
+        binary = binary / 10;
+        base = base * 2;
+    }
+    return decimal;
+}
+
+int main(void) {
+    printf("Enter binary number(s):\n");
+    return yyparse();
+}
+
+int yyerror(char *s) {
+    fprintf(stderr, "Error: %s\n", s);
+    return 0;
+}
