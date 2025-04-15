@@ -1,0 +1,72 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_LEN 100
+
+typedef struct Node {
+    char str[MAX_LEN];
+} Node;
+
+void print_node(Node *n) {
+    printf("%s\n", n->str);
+}
+%}
+
+%union {
+    Node node;
+    char* str;
+}
+
+%token <str> NUMBER
+%type <node> expr term factor
+
+%left '+' '-'
+%left '*' '/'
+
+%%
+input:
+    input line
+  | /* empty */
+  ;
+
+line:
+    expr '\n'  { print_node(&$1); }
+  ;
+
+expr:
+    expr '+' term  {
+        snprintf($$.str, MAX_LEN, "%s %s +", $1.str, $3.str);
+    }
+  | expr '-' term  {
+        snprintf($$.str, MAX_LEN, "%s %s -", $1.str, $3.str);
+    }
+  | term            { strcpy($$.str, $1.str); }
+  ;
+
+term:
+    term '*' factor {
+        snprintf($$.str, MAX_LEN, "%s %s *", $1.str, $3.str);
+    }
+  | term '/' factor {
+        snprintf($$.str, MAX_LEN, "%s %s /", $1.str, $3.str);
+    }
+  | factor          { strcpy($$.str, $1.str); }
+  ;
+
+factor:
+    '(' expr ')'    { strcpy($$.str, $2.str); }
+  | NUMBER          { strcpy($$.str, $1); free($1); }
+  ;
+%%
+
+int main(void) {
+    printf("Enter an infix expression:\n");
+    return yyparse();
+}
+
+int yyerror(char *s) {
+    fprintf(stderr, "Parse error: %s\n", s);
+    return 1;
+}
