@@ -1,0 +1,40 @@
+%{
+#include <stdio.h>
+
+int yyerror(char *s);
+int yylex(void);
+%}
+
+%token CHAR
+
+%%
+input:
+    input line
+  | /* empty */
+  ;
+
+line:
+    palindrome '\n' { printf("Palindrome\n"); }
+  | error '\n'      { printf("Not a palindrome\n"); yyerrok; }
+  ;
+
+palindrome:
+      /* empty */               // empty string is a palindrome
+    | CHAR                      // single character is a palindrome
+    | CHAR palindrome CHAR      // mirrors match on both ends
+        {
+            if ($1 != $3) {
+                YYERROR;
+            }
+        }
+    ;
+%%
+
+int main(void) {
+    printf("Enter a word:\n");
+    return yyparse();
+}
+
+int yyerror(char *s) {
+    return 0; // suppress default error
+}
